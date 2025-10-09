@@ -45,11 +45,6 @@ class ScQbfGeneticAlgorithm:
 
         # Starts Initial Population
         population = self.initialize_population()
-        # best_chromosome = self.get_best_chromosome(population)
-        # best_sol = self.decode(best_chromosome)
-
-        # if self.debug:
-        #     print(f"Generation {self.current_generation}: BestSolution =", best_sol)
 
         # Determine evolution mode
         if self.config.get('evolution_mode', 'default') == 'default':
