@@ -171,57 +171,6 @@ class ScQbfGeneticAlgorithm:
         
         return best_sol
 
-    # def solve(self) -> ScQbfSolution:
-    #     if self.instance is None:
-    #         raise ValueError("Problem instance is not initialized")
-
-    #     # Starts clock
-    #     start_time = time.perf_counter()
-
-    #     # Starts Initial Population
-    #     population = self.initialize_population()
-    #     best_chromosome = self.get_best_chromosome(population)
-    #     best_sol = self.decode(best_chromosome)
-
-    #     if self.debug:
-    #         print(f"Generation {self.current_generation}: BestSolution =", best_sol)
-
-    #     # Loop for each generation
-    #     while ((self.current_generation < self.generations) if self.config.get('stop_criteria', 'time') == 'generations' else True):
-    #         # Update generation
-    #         self.current_generation += 1
-
-    #         # Select parents
-    #         parents = self.select_parents(population)
-
-    #         # Generate offsprings throught crossover
-    #         offsprings = self.crossover(parents)
-
-    #         # Apply mutation
-    #         mutants = self.mutate(offsprings)
-
-    #         # Select best individuals for the next generation
-    #         new_population = self.select_population(mutants, best_chromosome)
-    #         population = new_population
-
-    #         # Get best solution in the current population
-    #         best_chromosome = self.get_best_chromosome(population)
-
-    #         # Update best solution found so far
-    #         best_fitness = self.fitness(best_chromosome)
-    #         if best_fitness._last_objfun_val > best_sol._last_objfun_val:
-    #             best_sol = self.decode(best_chromosome)
-    #             if self.debug:
-    #                 print(f"Generation {self.current_generation}: BestSolution =", best_sol)
-            
-    #         # Check time limit
-    #         self.solve_time = time.perf_counter() - start_time
-    #         if self.config.get('stop_criteria', 'time') == 'time' and self.solve_time >= self.time_limit_secs:
-    #             print(f"Time limit of {self.time_limit_secs} seconds reached, stopping Genetic Algorithm in generation {self.current_generation}.")
-    #             break
-
-    #     return best_sol
-
     def initialize_population(self) -> List[List[int]]:
         """
         Initializes a population of random chromosomes.
