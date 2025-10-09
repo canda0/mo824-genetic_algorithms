@@ -107,6 +107,7 @@ if __name__ == '__main__':
         ({'stop_criteria': 'time'}, 300, 1/100, 2),
         ({'stop_criteria': 'time'}, 100, 1/50, 3),
         ({'stop_criteria': 'time', 'crossover_type': 'uniform'}, 100, 1/100, 4),
+        ({'stop_criteria': 'time', 'evolution_mode': 'steady_state'}, 100, 1/100, 5),
     ]
 
     print("Starting experiments with the following configurations:")
