@@ -1,6 +1,3 @@
-# scqbf/scqbf_Tabu Search.py
-
-import math
 from scqbf.scqbf_instance import *
 from scqbf.scqbf_evaluator import *
 import random
@@ -18,7 +15,6 @@ class ScQbfGeneticAlgorithm:
                     'stop_criteria': 'time', # Options: 'time', 'generations'
                     'crossover_type': 'default' # Options: 'default', 'uniform'
                  }):
-        
         
         self.instance = instance
         self.config = config
@@ -111,7 +107,6 @@ class ScQbfGeneticAlgorithm:
         sol = ScQbfSolution(sol_elements)
         sol._last_objfun_val = self.evaluator.evaluate_objfun(sol)
         return sol
-        # return ScQbfSolution(sol_elements)
 
     def fitness(self, chromosome: List[int]) -> float:
         """
@@ -124,7 +119,6 @@ class ScQbfGeneticAlgorithm:
         """
         sol = self.decode(chromosome)
         return sol
-        # return self.evaluator.evaluate_objfun(sol)
 
     def get_best_chromosome(self, population: List[List[int]]) -> List[int]:
         """
