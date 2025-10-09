@@ -15,7 +15,8 @@ class ScQbfGeneticAlgorithm:
                  mutation_rate: float = 0.5,
                  debug: bool = False,
                  config: dict = {
-                    'stop_criteria': 'time' # Options: 'time', 'generations'
+                    'stop_criteria': 'time', # Options: 'time', 'generations'
+                    'crossover_type': 'default' # Options: 'default', 'uniform'
                  }):
         
         
@@ -187,24 +188,42 @@ class ScQbfGeneticAlgorithm:
             offsprings (List[List[int]]): A list of offspring chromosomes generated from the parents.
         """
         offsprings = []
+        if self.config.get('crossover_type', 'default') == 'uniform':
+            # Apply uniform crossover
+            for i in range(0, len(parents), 2): 
+                parent_1 = parents[i]
+                parent_2 = parents[i + 1]
+                offspring_1 = []
+                offspring_2 = []
 
-        # Apply crossover for each pair of parents
-        for i in range(0, len(parents), 2): 
-            parent_1 = parents[i]
-            parent_2 = parents[i + 1]
+                for allele in range(self.chromosome_size):
+                    if random.random() < 0.5: # coin toss for every allele
+                        offspring_1.append(parent_1[allele]) 
+                        offspring_2.append(parent_2[allele])
+                    else: # the coin toss decides which parent the offspring will inherit its allele from
+                        offspring_1.append(parent_2[allele])
+                        offspring_2.append(parent_1[allele])
 
-            # Select random crosspoints
-            crosspoint1 = random.randint(0, self.chromosome_size)
-            crosspoint2 = crosspoint1 + random.randint(0, (self.chromosome_size + 1) - crosspoint1)
+                offsprings.append(offspring_1)
+                offsprings.append(offspring_2)
+        else:
+            # Apply crossover for each pair of parents
+            for i in range(0, len(parents), 2): 
+                parent_1 = parents[i]
+                parent_2 = parents[i + 1]
 
-            # Create offsprings by exchanging genes between parents
-            offspring_1 = parent_1[:crosspoint1] + parent_2[crosspoint1:crosspoint2] + parent_1[crosspoint2:]
-            offspring_2 = parent_2[:crosspoint1] + parent_1[crosspoint1:crosspoint2] + parent_2[crosspoint2:]
+                # Select random crosspoints
+                crosspoint1 = random.randint(0, self.chromosome_size)
+                crosspoint2 = crosspoint1 + random.randint(0, (self.chromosome_size + 1) - crosspoint1)
 
-            # Add offsprings to the new population
-            offsprings.append(offspring_1)
-            offsprings.append(offspring_2)
-        
+                # Create offsprings by exchanging genes between parents
+                offspring_1 = parent_1[:crosspoint1] + parent_2[crosspoint1:crosspoint2] + parent_1[crosspoint2:]
+                offspring_2 = parent_2[:crosspoint1] + parent_1[crosspoint1:crosspoint2] + parent_2[crosspoint2:]
+
+                # Add offsprings to the new population
+                offsprings.append(offspring_1)
+                offsprings.append(offspring_2)
+            
         return offsprings
     
     def mutate(self, offsprings: List[List[int]]) -> List[List[int]]:
