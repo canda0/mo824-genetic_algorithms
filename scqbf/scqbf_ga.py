@@ -13,7 +13,8 @@ class ScQbfGeneticAlgorithm:
                  debug: bool = False,
                  config: dict = {
                     'stop_criteria': 'time', # Options: 'time', 'generations'
-                    'crossover_type': 'default' # Options: 'default', 'uniform'
+                    'crossover_type': 'default', # Options: 'default', 'uniform'
+                    'evolution_mode': 'default' # Options: 'default', 'steady_state'
                  }):
         
         self.instance = instance
@@ -29,6 +30,13 @@ class ScQbfGeneticAlgorithm:
         self.evaluator = ScQbfEvaluator(instance)
 
     def solve(self) -> ScQbfSolution:
+        """
+        Executes the genetic algorithm to solve the given instance, supporting both standard generational evolution and steady-state evolution modes.
+        The mode of evolution is determined by the 'evolution_mode' key in the configuration dictionary.
+        ----------
+        Returns:
+            best_sol (ScQbfSolution): The best solution decoded from the fittest chromosome found during the evolutionary search.
+        """
         if self.instance is None:
             raise ValueError("Problem instance is not initialized")
 
@@ -37,6 +45,28 @@ class ScQbfGeneticAlgorithm:
 
         # Starts Initial Population
         population = self.initialize_population()
+
+        # Determine evolution mode
+        if self.config.get('evolution_mode', 'default') == 'default':
+            best_sol = self._run_default_ga(population, start_time)
+        elif self.config.get('evolution_mode', 'default') == 'steady_state':
+            best_sol = self._run_steady_state(population, start_time)
+
+        return best_sol
+
+    def _run_default_ga(self, population, start_time) -> ScQbfSolution:
+        """
+        Runs the default genetic algorithm until the stopping criteria is met.
+        The stopping criteria can be either a time limit or a maximum number of generations,
+        as specified in the configuration.
+        ----------
+        Parameters:
+            population (List[List[int]]): The initial population of chromosomes.
+            start_time (float): The starting time of the algorithm.
+        Returns:
+            best_sol (ScQbfSolution): The best solution found by the algorithm.
+        """
+        # Define best chromosome in the initial population
         best_chromosome = self.get_best_chromosome(population)
         best_sol = self.decode(best_chromosome)
 
@@ -74,9 +104,71 @@ class ScQbfGeneticAlgorithm:
             # Check time limit
             self.solve_time = time.perf_counter() - start_time
             if self.config.get('stop_criteria', 'time') == 'time' and self.solve_time >= self.time_limit_secs:
-                print(f"Time limit of {self.time_limit_secs} seconds reached, stopping Genetic Algorithm in generation {self.current_generation}.")
+                print(f"Time limit of {self.time_limit_secs} seconds reached, stopping Genetic Algorithm in generation {self.current_generation}.", flush=True)
                 break
 
+        return best_sol
+
+    def _run_steady_state(self, population, start_time) -> ScQbfSolution:
+        """
+        Runs steady-state GA, where only the worst individuals are replaced with new offspring.
+        It incrementally evolves the population by selecting parents generating a small number of offspring, 
+        and replacing the worst individuals in the population if the offspring show improved fitness.
+        The process continues until the stopping criteria is met, which can be either a time limit or a maximum number of generations,
+        as specified in the configuration.
+        ----------
+        Parameters:
+            population (List[List[int]]): The initial population of chromosomes.
+            start_time (float): The starting time of the algorithm.
+        Returns:
+            best_sol (ScQbfSolution): The best solution found by the algorithm.
+        """
+        # Define best chromosome in the initial population
+        best_chromosome = self.get_best_chromosome(population)
+        best_sol = self.decode(best_chromosome)
+
+        if self.debug:
+            print(f"Generation {self.current_generation}: BestSolution =", best_sol)
+
+        # Loop for each generation
+        while ((self.current_generation < self.generations) if self.config.get('stop_criteria', 'time') == 'generations' else True):
+            self.current_generation += 1
+
+            # Tournament selection of two parents
+            idx1, idx2 = random.sample(range(len(population)), 2)
+            parent1 = population[idx1]
+            parent2 = population[idx2]
+
+            # Ensure parent1 is the fitter
+            if self.fitness(parent1)._last_objfun_val < self.fitness(parent2)._last_objfun_val:
+                parent1, parent2 = parent2, parent1
+
+            # Generate offsprings
+            offsprings = self.crossover([parent1, parent2])
+
+            # Apply mutation
+            mutants = self.mutate(offsprings)
+
+            # Replace worst individuals if mutant is better
+            for mutant in mutants:
+                worst = self.get_worst_chromosome(population)
+                idx_worst = population.index(worst)
+                if self.fitness(mutant)._last_objfun_val > self.fitness(worst)._last_objfun_val:
+                    population[idx_worst] = mutant
+
+            # Get best solution in the current population
+            best_chromosome = self.get_best_chromosome(population)
+            if self.fitness(best_chromosome)._last_objfun_val > best_sol._last_objfun_val:
+                best_sol = self.decode(best_chromosome)
+                if self.debug:
+                    print(f"Generation {self.current_generation}: BestSolution =", best_sol)
+            
+            # Check time limit
+            self.solve_time = time.perf_counter() - start_time
+            if self.config.get('stop_criteria', 'time') == 'time' and self.solve_time >= self.time_limit_secs:
+                print(f"Time limit of {self.time_limit_secs} seconds reached, stopping Genetic Algorithm in generation {self.current_generation}.")
+                break
+        
         return best_sol
 
     def initialize_population(self) -> List[List[int]]:
