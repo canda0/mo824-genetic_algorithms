@@ -52,13 +52,13 @@ def run_experiment(config: dict, pop_size, mutation_rate) -> pd.DataFrame:
         }
 
         # Print values
-        print(f"Results for instance {inst} of generation strategy {gen} with {results['n']} variables:")
-        print(f"---- Best objective value: {results['best_objective']:.2f}")
-        print(f"---- Selected elements: {best_solution.elements}")
-        print(f"---- Coverage: {results['coverage']:.2%}")
-        print(f"---- Generations executed: {results['n_generations']}")
-        print(f"---- Time taken (s): {results['time_taken']}")
-        print()
+        print(f"Results for instance {inst} of generation strategy {gen} with {results['n']} variables:", flush=True)
+        print(f"---- Best objective value: {results['best_objective']:.2f}", flush=True)
+        print(f"---- Selected elements: {best_solution.elements}", flush=True)
+        print(f"---- Coverage: {results['coverage']:.2%}", flush=True)
+        print(f"---- Generations executed: {results['n_generations']}", flush=True)
+        print(f"---- Time taken (s): {results['time_taken']}", flush=True)
+        print(flush=True)
 
         return results
     
@@ -66,7 +66,7 @@ def run_experiment(config: dict, pop_size, mutation_rate) -> pd.DataFrame:
     instance_paths = [(f"instances/gen{i}/instance{j}.txt", i, j) for i in range(1, 4) for j in range(1, 6)]
 
     # Parrallel processing of instances
-    results = Parallel(n_jobs=4)(
+    results = Parallel(n_jobs=2)(
         delayed(process_instance)(instance_path, gen, inst)
         for instance_path, gen, inst in instance_paths
     )
@@ -95,7 +95,7 @@ def run_all(experiments, max_workers=2):
         futures = [executor.submit(run_and_save_experiment, args) for args in experiments]
         for fut in concurrent.futures.as_completed(futures):
             exp_id, filename = fut.result()  # exceções aqui serão lançadas
-            print(f"Experimento {exp_id} salvo em {filename}")
+            print(f"Experimento {exp_id} salvo em {filename}", flush=True)
             results.append(pd.read_csv(filename))
             
     return pd.concat(results, ignore_index=True)

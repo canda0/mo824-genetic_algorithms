@@ -104,7 +104,7 @@ class ScQbfGeneticAlgorithm:
             # Check time limit
             self.solve_time = time.perf_counter() - start_time
             if self.config.get('stop_criteria', 'time') == 'time' and self.solve_time >= self.time_limit_secs:
-                print(f"Time limit of {self.time_limit_secs} seconds reached, stopping Genetic Algorithm in generation {self.current_generation}.")
+                print(f"Time limit of {self.time_limit_secs} seconds reached, stopping Genetic Algorithm in generation {self.current_generation}.", flush=True)
                 break
 
         return best_sol
